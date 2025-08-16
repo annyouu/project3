@@ -13,6 +13,13 @@ const Event = ({ events }) => {
             {event.event_date}
             {' - '}
             {event.event_type}
+            <button
+                className="delete"
+                type="button"
+                onClick={() => onDelete(event.id)}
+            >
+                Delete
+            </button>
         </h2>
         <ul>
             <li>
@@ -51,6 +58,8 @@ Event.propTypes = {
           published: PropTypes.bool.isRequired,
         })
       ).isRequired,
+    
+      onDelete: PropTypes.func.isRequired,
 };
 
 export default Event;

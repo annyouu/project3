@@ -2,8 +2,9 @@ import React, { useState, useRef, useEffect } from 'react';
 import Pikaday from 'pikaday';
 import 'pikaday/css/pikaday.css';
 import { formatDate, isEmptyObject, validateEvent } from '../helpers/helpers';
+import PropTypes from 'prop-types';
 
-const EventForm = () => {
+const EventForm = ( { onSave } ) => {
     const [event, setEvent] = useState({
         event_type: '',
         event_date: '',
@@ -22,7 +23,7 @@ const EventForm = () => {
             onSelect: (date) => {
                 const formattedDate = formatDate(date);
                 dateInput.current.value = formattedDate;
-                updateEvent('evnet_date', formattedDate);
+                updateEvent('event_date', formattedDate);
             },
         });
         // クリーンアップ用の関数を返す
@@ -30,44 +31,38 @@ const EventForm = () => {
     }, []);
 
     const updateEvent = (key, value) => {
-        setEvent((prevEvnet) => ({ ...prevEvnet, [key]: value }));
+        setEvent((prevEvent) => ({ ...prevEvent, [key]: value }));
     };
 
     const handleInputChange = (e) => {
-        const { target } = e;
-        const { name } = target;
-        const value = target.type === 'checkbox' ? target.checked : target.value;
-
-        // setEvent({...event, [name]: value});
-        updateEvent(name, value);
+      const { target } = e;
+      const { name } = target;
+      const value = target.type === 'checkbox' ? target.checked : target.value;
+      updateEvent(name, value);
     };
 
     const renderErrors = () => {
-        if (isEmptyObject(formErrors)) {
-            return null;
-        }
-
-        return (
-           <div className="errors">
-                <h3>The following errors prohibited the event from being saved:</h3>
-                <ul>
-                {Object.values(formErrors).map((formError) => (
-                    <li key={formError}>{formError}</li>
-                ))}
-                </ul>
-           </div>
-        );
+      if (isEmptyObject(formErrors)) return null;
+      return (
+        <div className="errors">
+          <h3>The following errors prohibited the event from being saved:</h3>
+          <ul>
+            {Object.values(formErrors).map((formError) => (
+              <li key={formError}>{formError}</li>
+            ))}
+          </ul>
+        </div>
+      );
     };
 
     const handleSubmit = (e) => {
-        e.preventDefault();
-        const errors = validateEvent(event);
-
-        if (!isEmptyObject(errors)) {
-            setFormErrors(errors);
-        } else {
-            console.log(event);
-        }
+      e.preventDefault();
+      const errors = validateEvent(event);
+      if (!isEmptyObject(errors)) {
+        setFormErrors(errors)
+      } else {
+        onSave(event); // propsから受け取った関数を呼ぶ
+      }
     };
 
     return (
@@ -153,3 +148,7 @@ const EventForm = () => {
 }
 
 export default EventForm;
+
+EventForm.propTypes = {
+  onSave: PropTypes.func.isRequired,
+};
