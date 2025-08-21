@@ -23,7 +23,8 @@ const EventForm = ( { onSave } ) => {
             onSelect: (date) => {
                 const formattedDate = formatDate(date);
                 dateInput.current.value = formattedDate;
-                updateEvent('event_date', formattedDate);
+                // Pikadayで選択された時に直接stateを更新する
+                setEvent((prevEvent) => ({ ...prevEvent, event_date: formattedDate }));
             },
         });
         // クリーンアップ用の関数を返す
@@ -38,7 +39,13 @@ const EventForm = ( { onSave } ) => {
       const { target } = e;
       const { name } = target;
       const value = target.type === 'checkbox' ? target.checked : target.value;
-      updateEvent(name, value);
+      // updateEvent(name, value);
+
+      if (name === 'event_date') {
+        updateEvent(name, dateInput.current.value);
+      } else {
+        updateEvent(name, value);
+      }
     };
 
     const renderErrors = () => {
