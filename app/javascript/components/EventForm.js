@@ -1,25 +1,38 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import Pikaday from 'pikaday';
 import 'pikaday/css/pikaday.css';
 import { formatDate, isEmptyObject, validateEvent } from '../helpers/helpers';
 import PropTypes from 'prop-types';
+import { useParams, Link } from 'react-router-dom';
 
-const EventForm = ( { onSave } ) => {
-    const [event, setEvent] = useState({
-        event_type: '',
-        event_date: '',
-        title: '',
-        speaker: '',
-        host: '',
-        published: false,
-    });
+const EventForm = ( { onSave, events } ) => {
+    const { id } = useParams();
+    const cancelURL = event.id ? `/events/${event.id}` : '/events';
+    const title = event.id ? `${event.event_date} - ${event.event_type}` : 'New Event';
 
+    const initialEventState = useCallback(
+      () => {
+        const defaults = {
+          event_type: '',
+          event_date: '',
+          title: '',
+          speaker: '',
+          host: '',
+          published: false,
+        };
+
+        const currEvent = id ? events.find((e) => e.id === Number(id)) : {};
+        return { ...defaults, ...currEvent }
+      }, [events, id]
+    );
+    const [event, setEvent] = useState(initialEventState);
     const [formErrors, setFormErrors] = useState({});
     const dateInput = useRef(null);
 
     useEffect(() => {
         const p = new Pikaday({
             field: dateInput.current,
+            toString: date => formatDate(date),
             onSelect: (date) => {
                 const formattedDate = formatDate(date);
                 dateInput.current.value = formattedDate;
@@ -30,6 +43,10 @@ const EventForm = ( { onSave } ) => {
         // クリーンアップ用の関数を返す
         return () => p.destroy();
     }, []);
+
+    useEffect(() => {
+      setEvent(initialEventState);
+    }, [events]);
 
     const updateEvent = (key, value) => {
         setEvent((prevEvent) => ({ ...prevEvent, [key]: value }));
@@ -74,9 +91,10 @@ const EventForm = ( { onSave } ) => {
 
     return (
     <section>
+
+      <h2>{title}</h2>
       {renderErrors()}
 
-      <h2>New Event</h2>
       <form className="eventForm" onSubmit={handleSubmit}>
         <div>
           <label htmlFor="event_type">
@@ -86,6 +104,7 @@ const EventForm = ( { onSave } ) => {
               id="event_type"
               name="event_type"
               onChange={handleInputChange}
+              value={event.event_type}
             />
           </label>
         </div>
@@ -98,6 +117,8 @@ const EventForm = ( { onSave } ) => {
                 name="event_date"
                 ref={dateInput}
                 autoComplete="off"
+                value={event.event_date}
+                onChange={handleInputChange}
             />
           </label>
         </div>
@@ -110,6 +131,7 @@ const EventForm = ( { onSave } ) => {
               id="title"
               name="title"
               onChange={handleInputChange}
+              value={event.title}
             />
           </label>
         </div>
@@ -121,6 +143,7 @@ const EventForm = ( { onSave } ) => {
               id="speaker"
               name="speaker"
               onChange={handleInputChange}
+              value={event.speaker}
             />
           </label>
         </div>
@@ -132,6 +155,7 @@ const EventForm = ( { onSave } ) => {
               id="host"
               name="host"
               onChange={handleInputChange}
+              value={event.host}
             />
           </label>
         </div>
@@ -143,11 +167,13 @@ const EventForm = ( { onSave } ) => {
               id="published"
               name="published"
               onChange={handleInputChange}
+              checked={event.published}
             />
           </label>
         </div>
         <div className="form-actions">
           <button type="submit">Save</button>
+          <Link to={cancelURL}>Cancel</Link>
         </div>
       </form>
     </section>
@@ -157,5 +183,20 @@ const EventForm = ( { onSave } ) => {
 export default EventForm;
 
 EventForm.propTypes = {
+  events: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.number.isRequired,
+      event_type: PropTypes.string.isRequired,
+      event_date: PropTypes.string.isRequired,
+      title: PropTypes.string.isRequired,
+      speaker: PropTypes.string.isRequired,
+      host: PropTypes.string.isRequired,
+      published: PropTypes.bool.isRequired,
+    })
+  ),
   onSave: PropTypes.func.isRequired,
+};
+
+EventForm.defaultProps = {
+  events: [],
 };

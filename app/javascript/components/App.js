@@ -5,9 +5,12 @@ import { ToastContainer } from 'react-toastify';
 import './App.css';
 
 const App = () => (
-    <Routes>
-        <Route path="events/*" element={<Editor />} />
-    </Routes>
+    <>
+        <Routes>
+            <Route path="events/*" element={<Editor />} />
+        </Routes>
+        <ToastContainer />
+    </>
 );
 
 export default App;

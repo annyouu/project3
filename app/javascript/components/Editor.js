@@ -55,6 +55,7 @@ const Editor = () => {
 
     const deleteEvent = async (eventId) => {
         const sure = window.confirm('Are you sure?');
+
         if (sure) {
             try {
                 const response = await window.fetch(`/api/events/${eventId}`, {
@@ -73,6 +74,33 @@ const Editor = () => {
         }
     };
 
+    const updateEvent = async (updatedEvent) => {
+        try {
+            const response = await window.fetch(
+                `/api/events/${updatedEvent.id}`, {
+                    method: 'PUT',
+                    body: JSON.stringify(updatedEvent),
+                    headers: {
+                        Accept: 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                }
+            );
+
+            if (!response.ok) throw Error(response.statusText);
+
+            const newEvents = events;
+            const idx = newEvents.findIndex((event) => event.id === updatedEvent.id);
+            newEvnets[idx] = updatedEvent;
+            setEvnets(newEvents);
+
+            success("Event Updated!");
+            navigate(`/events/${updatedEvent.id}`);
+        } catch (error) {
+            handleAjaxError(error);
+        }
+    };
+
     return (
         <>
             <Header />
@@ -86,6 +114,7 @@ const Editor = () => {
                 <Routes>
                     <Route path="new" element={<EventForm onSave={addEvent} />}/>
                     <Route path=":id" element={<Event events={events} onDelete={deleteEvent} />} />
+                    <Route path=":id/edit" element={<EventForm onSave={updateEvent}/>}/>
                 </Routes>
                 </>
             )}
