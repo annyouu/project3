@@ -4,13 +4,12 @@ import 'pikaday/css/pikaday.css';
 import { formatDate, isEmptyObject, validateEvent } from '../helpers/helpers';
 import PropTypes from 'prop-types';
 import { useParams, Link } from 'react-router-dom';
+import EventNotFound from './EventNotFound';
 
 const EventForm = ( { onSave, events } ) => {
     const { id } = useParams();
-    const cancelURL = event.id ? `/events/${event.id}` : '/events';
-    const title = event.id ? `${event.event_date} - ${event.event_type}` : 'New Event';
 
-    const initialEventState = useCallback(
+    const initialEventState = useCallback (
       () => {
         const defaults = {
           event_type: '',
@@ -25,9 +24,14 @@ const EventForm = ( { onSave, events } ) => {
         return { ...defaults, ...currEvent }
       }, [events, id]
     );
-    const [event, setEvent] = useState(initialEventState);
+    const [event, setEvent] = useState(() => initialEventState());
     const [formErrors, setFormErrors] = useState({});
     const dateInput = useRef(null);
+
+    if (id && !event.id) return <EventNotFound />;
+
+    const cancelURL = event.id ? `/events/${event.id}` : '/events';
+    const title = event.id ? `${event.event_date} - ${event.event_type}` : 'New Event';
 
     useEffect(() => {
         const p = new Pikaday({

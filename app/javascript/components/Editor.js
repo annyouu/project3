@@ -89,10 +89,10 @@ const Editor = () => {
 
             if (!response.ok) throw Error(response.statusText);
 
-            const newEvents = events;
+            const newEvents = [...events];
             const idx = newEvents.findIndex((event) => event.id === updatedEvent.id);
-            newEvnets[idx] = updatedEvent;
-            setEvnets(newEvents);
+            newEvents[idx] = updatedEvent;
+            setEvents(newEvents);
 
             success("Event Updated!");
             navigate(`/events/${updatedEvent.id}`);
@@ -112,9 +112,9 @@ const Editor = () => {
                 <EventList events={events} />
 
                 <Routes>
-                    <Route path="new" element={<EventForm onSave={addEvent} />}/>
-                    <Route path=":id" element={<Event events={events} onDelete={deleteEvent} />} />
-                    <Route path=":id/edit" element={<EventForm onSave={updateEvent}/>}/>
+                    <Route path="new" element={<EventForm onSave={addEvent} events={events} />}/>
+                    <Route path=":id" element={<Event onDelete={deleteEvent} events={events} />} />
+                    <Route path=":id/edit" element={<EventForm onSave={updateEvent} events={events} />}/>
                 </Routes>
                 </>
             )}
